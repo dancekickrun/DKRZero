@@ -169,6 +169,7 @@ public:
   int fLEDState;
 
   long fRescueCount;
+  long fDataCount;
 
   float fDataRate;
 

@@ -37,6 +37,9 @@ ESP32SDCardConnection::ESP32SDCardConnection(JsonObject& json_connection) : fStu
   // ... for raw and sample frequency processors
   fWriteBufferSize=200;
 
+  // Data rate is also sensitive to this
+  fWriteModulo=20;
+
   Setup(json_connection);
 
 };
@@ -51,6 +54,7 @@ void ESP32SDCardConnection::Setup(JsonObject& json_connection)
   if(json_connection.containsKey("base_filename")) fStubFilename = json_connection["base_filename"];
   if(json_connection.containsKey("continuous")) fContinuousAcq = json_connection["continuous"];
   if(json_connection.containsKey("max_file_size")) fMaxFileSize = atoi(json_connection["max_file_size"]);
+  if(json_connection.containsKey("write_every")) fWriteModulo = atoi(json_connection["write_every"]);
   if(json_connection.containsKey("write_buffer_size")) fWriteBufferSize = atoi(json_connection["write_buffer_size"]);
 
   // Initialize the SD connection
@@ -80,6 +84,9 @@ void ESP32SDCardConnection::Start()
   fDataLogFile->setWriteBufferSize(fWriteBufferSize);
   fDataLogFile->startLog("/data", fStubFilename);
 
+  output_data="";
+  fNumWrites=0;
+
 };
 
 void ESP32SDCardConnection::Stop()
@@ -91,15 +98,26 @@ void ESP32SDCardConnection::Communicate(String message_input)
 {
 
   // Save the data to the current file
-  // unsigned long startMillis = millis();
-  Serial.println(message_input);
+  // Serial.println(message_input);
+
   // unsigned long cur = millis();
   // Serial.print("Communicate Serial ");
   // Serial.println(cur-startMillis);
-
-
   // startMillis = millis();
-  fDataLogFile->println(message_input);
+
+  if((fNumWrites%fWriteModulo)==0)
+  {
+    fDataLogFile->print(output_data);
+    output_data="";
+  }
+  else
+  {
+      output_data+=message_input;
+      output_data+="\n";
+      fNumWrites++;
+  }
+
+
   // cur = millis();
   // Serial.print("Communicate FileSerial ");
   // Serial.println(cur-startMillis);

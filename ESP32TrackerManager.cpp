@@ -592,11 +592,9 @@ void ESP32TrackerManager::Acquisition()
   IMUAcquisition();
 
   // Serial.print("State Updated "); Serial.println(fStateUpdated);
-
-  // Run the processors
-  // (fProcessors.at(0))->ProcessData(sqrt(ax*ax+ay*ay+az*az));
-
   if(!fStateUpdated) return;
+
+
 
   // Loop over the processors
   unsigned long startMillis = millis();
@@ -609,8 +607,23 @@ void ESP32TrackerManager::Acquisition()
     // Serial.print("ProcessData ");
     // Serial.println(cur-startMillis);
 
+    fOutputMessage+=process->Message();
+    fOutputMessage+="\n";
+    fMessageCount++;
+    if((fMessageCount%20)==0)
+    {
+      Serial.println(fOutputMessage);
+      fOutputMessage="";
+    }
+
     // startMillis = millis();
-    if(process->GetDataReady()) for(auto connection: fConnections) connection->Communicate(process->Message());
+    if(process->GetDataReady())
+    {
+      for(auto connection: fConnections)
+      {
+        connection->Communicate(process->Message());
+      }
+    }
     // cur = millis();
     // Serial.print("Communicate ");
     // Serial.println(cur-startMillis);

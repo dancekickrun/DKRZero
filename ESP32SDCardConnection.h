@@ -42,6 +42,10 @@ public:
 
 private:
 
+  String output_data;
+  long fNumWrites;
+  int fWriteModulo;
+
   FileSerial* fDataLogFile;
   const char* fStubFilename;
   bool fContinuousAcq;// if true then don't get a new file for every event
