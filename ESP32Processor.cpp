@@ -8,7 +8,7 @@
 
 #include "ESP32Processor.h"
 
-ESP32Processor::ESP32Processor(const char* message_format, const char* message_transport)
+ESP32Processor::ESP32Processor()
 {
   // the names to compare with
   const char* format_space_name = "space";
@@ -19,6 +19,9 @@ ESP32Processor::ESP32Processor(const char* message_format, const char* message_t
   fDataReady=true;
   fDelimiter=String(" ");
   fNelements=-1;
+
+  const char* message_format = "space_no_names";
+  const char* message_transport = "serial";
 
   // Return the Class of the processor if requested in the JSON
   if (strcmp(message_format, format_space_name) == 0) fMessageFormat = MessengerFormat::Space;
@@ -107,13 +110,28 @@ String ESP32Processor::Message()
 
   if(fNelements<0) fNelements = 1e9;
 
-  String s("");
+  char add_data[30];
+  char tmp_message[1000];
+
+  snprintf(tmp_message, sizeof(tmp_message), "%12.0f ", (float) MessageTransportData[0]);
+
+  for(int i=1;i<MessageTransportData.size(); i++)
+  {
+    snprintf(add_data, sizeof(add_data), "%6.4f ", (float) MessageTransportData[i]);
+    strcat(tmp_message,add_data);
+  }
+  // snprintf(add_data, sizeof(add_data), "\n");
+  // strcat(tmp_message,add_data);
+
+  return String(tmp_message);
+}
+
+
+  // String s("");
   // Serial.print("Time: ");
   // Serial.println(fCurrentTime);
   // s+= fCurrentTime;
   // s+= fDelimiter;
-  for(int i=0;i<MessageTransportData.size(); i++)
-  {
     // Serial.println(i);
     // Serial.println(MessageTransportData.at(i));
     // if(i==0)
@@ -122,14 +140,13 @@ String ESP32Processor::Message()
     // }
     // else
     // {
-      s+= String(MessageTransportData.at(i),6);
-    // }
-    s+= fDelimiter;
-    if(((i+1)%fNelements)==0) s+= String("\n");
-  }
-
-  return s;
-}
+    //   s+= String(MessageTransportData.at(i),6);
+    // // }
+    // s+= fDelimiter;
+    // if(((i+1)%fNelements)==0) s+= String("\n");
+  // }
+  // return s;
+// }
 
 // String ESP32Processor::Message() {
 //

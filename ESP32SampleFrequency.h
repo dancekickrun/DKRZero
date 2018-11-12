@@ -1,10 +1,17 @@
+// Copyright (c) 2018 by Chris Steer.
+// All Rights Reserved.
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 //
-//  ESP32SampleFrequency.hpp
-//  trigger
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
 //
-//  Created by Chris Steer on 11/08/2018.
-//
-//
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #ifndef ESP32SampleFrequency_hpp
 #define ESP32SampleFrequency_hpp
@@ -18,16 +25,12 @@ class ESP32SampleFrequency : public ESP32Processor
 
 public:
 
-    ESP32SampleFrequency(
-      const char* message_format,
-      const char* message_transport,
-      int npoints
-    );
+    ESP32SampleFrequency(JsonObject& json_process);
 
     ~ESP32SampleFrequency();
 
     // Initialize the processor
-    void Setup();
+    void Setup(JsonObject& json_process);
 
     //
     void ProcessData(long, float data);

@@ -8,42 +8,61 @@
 
 #include "ESP32Impulse.h"
 
-ESP32Impulse::ESP32Impulse(const char* message_format, const char* message_transport, int buffer_size, float threshold, int delay) : ESP32Processor(message_format, message_transport),
-fBufferSize(buffer_size),
-fBufferThreshold(threshold),
-fBufferDelay(delay),
-fMeasurements(9,std::vector<float>(buffer_size,0.0)),
-fOnOffs(std::vector<bool>(buffer_size,true)),
-fDataCount(0),
-fThresholdCoord(10)
-{};
+ESP32Impulse::ESP32Impulse(JsonObject& json_process)
+{
+  fBufferSize = 100;
+  fBufferThreshold = 2.0;
+  fBufferDelay = 50;
 
-ESP32Impulse::ESP32Impulse(const char* message_format, const char* message_transport, int buffer_size, float threshold, int delay, std::vector<bool> mask) : ESP32Processor(message_format, message_transport),
-fBufferSize(buffer_size),
-fBufferThreshold(threshold),
-fBufferDelay(delay),
-fMeasurements(9,std::vector<float>(buffer_size,0.0)),
-fOnOffs(mask),
-fDataCount(0),
-fThresholdCoord(10)
-{};
+  for(int i=0;i<13;i++) fMeasurements.push_back(std::vector<float>(fBufferSize,0.0));
 
-ESP32Impulse::ESP32Impulse(const char* message_format, const char* message_transport, int buffer_size, float threshold, int delay, std::vector<bool> mask, int threshold_coord) : ESP32Processor(message_format, message_transport),
-fBufferSize(buffer_size),
-fBufferThreshold(threshold),
-fBufferDelay(delay),
-fMeasurements(13,std::vector<float>(buffer_size,0.0)),
-fOnOffs(mask),
-fDataCount(0),
-fThresholdCoord(threshold_coord)
-{};
+  // fOnOffs(mask),
+  // fDataCount(0),
+  // fThresholdCoord(threshold_coord)
+
+};
+
+// ESP32Impulse::ESP32Impulse(const char* message_format, const char* message_transport, int buffer_size, float threshold, int delay) : ESP32Processor(message_format, message_transport),
+// fBufferSize(buffer_size),
+// fBufferThreshold(threshold),
+// fBufferDelay(delay),
+// fMeasurements(9,std::vector<float>(buffer_size,0.0)),
+// fOnOffs(std::vector<bool>(buffer_size,true)),
+// fDataCount(0),
+// fThresholdCoord(10)
+// {};
+//
+// ESP32Impulse::ESP32Impulse(const char* message_format, const char* message_transport, int buffer_size, float threshold, int delay, std::vector<bool> mask) : ESP32Processor(message_format, message_transport),
+// fBufferSize(buffer_size),
+// fBufferThreshold(threshold),
+// fBufferDelay(delay),
+// fMeasurements(9,std::vector<float>(buffer_size,0.0)),
+// fOnOffs(mask),
+// fDataCount(0),
+// fThresholdCoord(10)
+// {};
+//
+// ESP32Impulse::ESP32Impulse(const char* message_format, const char* message_transport, int buffer_size, float threshold, int delay, std::vector<bool> mask, int threshold_coord) : ESP32Processor(message_format, message_transport),
+// fBufferSize(buffer_size),
+// fBufferThreshold(threshold),
+// fBufferDelay(delay),
+// fMeasurements(13,std::vector<float>(buffer_size,0.0)),
+// fOnOffs(mask),
+// fDataCount(0),
+// fThresholdCoord(threshold_coord)
+// {};
 
 ESP32Impulse::~ESP32Impulse(){};
 
-void ESP32Impulse::Setup()
+void ESP32Impulse::Setup(JsonObject& json_process)
 {
 
   fNoNames=true;
+
+
+  if(json_process.containsKey("buffer_size")) fBufferSize = atoi(json_process["buffer_size"]);
+  if(json_process.containsKey("trigger_threshold")) fBufferThreshold = atoi(json_process["trigger_threshold"]);
+  if(json_process.containsKey("trigger_delay")) fBufferDelay = atoi(json_process["trigger_delay"]);
 
   Serial.println("INFO: Setting up Impulse Processor:");
   Serial.print(" - Buffer Size ");
@@ -52,14 +71,14 @@ void ESP32Impulse::Setup()
   Serial.println(fBufferDelay);
   Serial.print(" - Buffer Threshold ");
   Serial.println(fBufferThreshold);
-  Serial.print(" - Threshold Coord ");
-  Serial.println(fThresholdCoord);
-  Serial.print(" - Mask[0] ");
-  Serial.println(fOnOffs[0]);
-  Serial.print(" - Mask[1] ");
-  Serial.println(fOnOffs[1]);
-  Serial.print(" - Mask[2] ");
-  Serial.println(fOnOffs[2]);
+  // Serial.print(" - Threshold Coord ");
+  // Serial.println(fThresholdCoord);
+  // Serial.print(" - Mask[0] ");
+  // Serial.println(fOnOffs[0]);
+  // Serial.print(" - Mask[1] ");
+  // Serial.println(fOnOffs[1]);
+  // Serial.print(" - Mask[2] ");
+  // Serial.println(fOnOffs[2]);
 
   // Do not communicate until triggered
   fDataReady=false;
@@ -107,12 +126,6 @@ void ESP32Impulse::ProcessData(long t,float lat,float lon, float a, float b,floa
   // Serial.print(" / ");
   // Serial.println((fBufferSize*((int) meas.size())));
 
-
-
-
-
-
-
   // // Delete and append the time
   // if(fMeasurements[0].size()==fBufferSize) fMeasurements[0].erase(fMeasurements[0].begin());
   // fMeasurements[0].push_back(t);
@@ -127,22 +140,28 @@ void ESP32Impulse::ProcessData(long t,float lat,float lon, float a, float b,floa
   // // Add the first data of every measurement if true
   // for(int i=0; i<12; i++) fMeasurements[i+1].push_back(meas.at(i));
 
+
+  // In untriggered operation the unit should just append the data to the buffer (above)
+  // and then maintain fDataReady as false until the trigger condition is met
+
   // When the trigger condition is met, we need to start the count towards the buffer delay
-  // - probably need to ensure that there is a full buffer?
+  // so set the flag fBufferDelayOn to be true
   if(meas.back()>fBufferThreshold) fBufferDelayOn = true;
 
+  // If the count is less than the delay then keep the data as being not ready
   if(fBufferDelayCount<fBufferDelay)
   {
     ESP32Processor::fDataReady=false;
-  }
-  else
-  {
-    // CopyDataToMessage();
+
+  } else {
+    // Here the count is equal to or larger than the delay count so we want to write it out
     ESP32Processor::fDataReady = true;
+    // Stop the delay count and reinitialize it to 0
     fBufferDelayOn = false;
     fBufferDelayCount=0;
   }
 
+  // If the trigger condition has been met then keep counting the data into the buffer
   if(fBufferDelayOn) fBufferDelayCount++;
 
 }

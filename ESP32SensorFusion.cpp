@@ -1,28 +1,33 @@
+// Copyright (c) 2018 by Chris Steer.
+// All Rights Reserved.
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 //
-//  ESP32SensorFusion.cpp
-//  trigger
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
 //
-//  Created by Chris Steer on 11/08/2018.
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
-//
+
 #include "ESP32SensorFusion.h"
 
-ESP32SensorFusion::ESP32SensorFusion(bool UseMahony, bool UseMag, const char* message_format,const char* message_transport) :
- ESP32Processor(message_format, message_transport)
+ESP32SensorFusion::ESP32SensorFusion(JsonObject& json_process)
 {
 
   fPitch = 30.0*DEG_TO_RAD;
   fRoll = 30.0*DEG_TO_RAD;
   fYaw = 30.0*DEG_TO_RAD;
 
-  fMahony = UseMahony;
-  fMagEnable = UseMag;
-
   deltat = filter.deltatUpdate();
 
 }
 
-void ESP32SensorFusion::Setup()
+void ESP32SensorFusion::Setup(JsonObject& json_process)
 {
   ESP32Processor::MessageTransportNames.clear();
   ESP32Processor::MessageTransportNames.push_back("roll");

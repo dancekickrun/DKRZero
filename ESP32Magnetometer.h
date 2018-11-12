@@ -13,45 +13,44 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-#ifndef ESP32SampleStatistics_hpp
-#define ESP32SampleStatistics_hpp
+#ifndef ESP32Magnetometer_hpp
+#define ESP32Magnetometer_hpp
 
 #include <vector>
 #include <stdio.h>
-#include "ESP32Processor.h"
 #include <ArduinoJson.h>
+#include "ESP32Sensor.h"
 
-class ESP32SampleStatistics : public ESP32Processor
+
+
+// Simple class to represent a sensor
+class ESP32Magnetometer: public ESP32Sensor
 {
 
 public:
 
-    ESP32SampleStatistics(JsonObject& json_process);
+    ESP32Magnetometer(JsonObject& json_sensor);
+    ~ESP32Magnetometer();
 
-    ~ESP32SampleStatistics();
+    void Setup(JsonObject& root);
+    void ConfigureIMU(LSM9DS1* imu);
 
-    // Initialize the processor
-    void Setup(JsonObject& json_process);
+    bool GetLowPowerEnable(){return low_power_enable;};
+    bool GetTemperatureCompensation(){return temperature_compensation_enable;};
+    int GetXYPerformance(){return xy_performance;};
+    int GetZPerformance(){return z_performance;};
+    int GetOperationMode(){return operation_mode;};
 
-    //
-    void ProcessData(long, float data);
-    void ProcessData(long t,float la, float lo,
-      float ax,float ay,float az,
-      float gx,float gy,float gz,
-      float mx,float my,float mz);
-
-protected:
-
-
-  int fNPoints;
-  std::vector<bool> onoffs;
-
-  // Vectors to hold the last N points for 9 measurements
-  std::vector< std::vector<float> > measurements;
 
 private:
 
+  bool low_power_enable;
+  int xy_performance;
+  int z_performance;
+  int operation_mode;
+  bool temperature_compensation_enable;
+
 };
 
-#endif /* ESP32SampleStatistics_hpp */
+
+#endif /* ESP32Sensor_hpp */

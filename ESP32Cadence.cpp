@@ -1,10 +1,17 @@
+// Copyright (c) 2018 by Chris Steer.
+// All Rights Reserved.
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 //
-//  ESP32Cadence.cpp
-//  trigger
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
 //
-//  Created by Chris Steer on 11/08/2018.
-//
-//
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "ESP32Cadence.h"
 #include "arduinoFFT.h"
@@ -14,13 +21,12 @@
 #define SCL_FREQUENCY 0x02
 #define SCL_PLOT 0x03
 
-ESP32Cadence::ESP32Cadence(const char* message_format,const char* message_transport) :
-ESP32Processor(message_format, message_transport), fNPoints(64), fVerboseLevel(0), fStartupCount(0)
+ESP32Cadence::ESP32Cadence(JsonObject& json_connection) : fNPoints(64), fVerboseLevel(0), fStartupCount(0)
 {}
 
 ESP32Cadence::~ESP32Cadence() {}
 
-void ESP32Cadence::Setup(){
+void ESP32Cadence::Setup(JsonObject& json_connection){
 
   Reset();
   fFFT = arduinoFFT();

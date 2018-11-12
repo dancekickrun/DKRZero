@@ -13,45 +13,29 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-#ifndef ESP32SampleStatistics_hpp
-#define ESP32SampleStatistics_hpp
+#ifndef ProcessFactory_hpp
+#define ProcessFactory_hpp
 
 #include <vector>
 #include <stdio.h>
-#include "ESP32Processor.h"
 #include <ArduinoJson.h>
 
-class ESP32SampleStatistics : public ESP32Processor
-{
+#include "ESP32Processor.h"
 
-public:
+// Processors' declarations
+#include "ESP32Activity.h"
+#include "ESP32Cadence.h"
+#include "ESP32RawData.h"
+#include "ESP32Impulse.h"
+#include "ESP32SensorFusion.h" //SF
+#include "ESP32SampleFrequency.h"
+#include "ESP32SampleStatistics.h"
+// #include "ESP32Geolocation.h"
 
-    ESP32SampleStatistics(JsonObject& json_process);
+namespace ProcessFactory {
 
-    ~ESP32SampleStatistics();
+ESP32Processor* ConstructProcess(JsonObject& json_sensor);
 
-    // Initialize the processor
-    void Setup(JsonObject& json_process);
+}// end of ProcessFactory namespace
 
-    //
-    void ProcessData(long, float data);
-    void ProcessData(long t,float la, float lo,
-      float ax,float ay,float az,
-      float gx,float gy,float gz,
-      float mx,float my,float mz);
-
-protected:
-
-
-  int fNPoints;
-  std::vector<bool> onoffs;
-
-  // Vectors to hold the last N points for 9 measurements
-  std::vector< std::vector<float> > measurements;
-
-private:
-
-};
-
-#endif /* ESP32SampleStatistics_hpp */
+#endif

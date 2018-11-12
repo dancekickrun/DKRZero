@@ -1,37 +1,43 @@
+// Copyright (c) 2018 by Chris Steer.
+// All Rights Reserved.
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 //
-//  ESP32Processor.hpp
-//  trigger
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
 //
-//  Created by Chris Steer on 11/08/2018.
-//
-//
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 
 #ifndef ESP32Processor_h
 #define ESP32Processor_h
 
 #include <stdio.h>
 #include <vector>
-#include <ESP32Configuration.h>
 #include <Esp.h>
+#include <ArduinoJson.h>
+
 #include "SPIFFS.h"
 
-class ESP32Configuration;
 
 class ESP32Processor {
 
 public:
 
-    ESP32Processor(const char* , const char*);
+    ESP32Processor();
     ~ESP32Processor();
 
     // Initialize the processor
-    virtual void Setup()=0;
+    virtual void Setup(JsonObject&)=0;
 
     //
     virtual void ProcessData(long, float data){};
     virtual void ProcessData(long, float , float, float, float, float, float, float, float, float, float, float){};
-
-
 
     void Reset(){
       MessageTransportData.clear();
@@ -90,7 +96,6 @@ public:
     int GetMessageLength(){return fNelements;};
     String GetMessageDelimiter(){return fDelimiter;};
 
-
 protected:
 
     String fOutputMessage;
@@ -100,7 +105,6 @@ protected:
     MessengerTransport fMessageTransport;
     std::vector<float> MessageTransportData;
     std::vector<String> MessageTransportNames;
-
 
     String fDelimiter;
     int fNelements;

@@ -1,27 +1,39 @@
+// Copyright (c) 2018 by Chris Steer.
+// All Rights Reserved.
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 //
-//  ESP32SampleFrequency.cpp
-//  trigger
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
 //
-//  Created by Chris Steer on 11/08/2018.
-//
-//
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "ESP32SampleFrequency.h"
 
-ESP32SampleFrequency::ESP32SampleFrequency(const char* message_format, const char* message_transport, int npoints):
-ESP32Processor(message_format, message_transport), fNPoints(npoints)
-{}
+ESP32SampleFrequency::ESP32SampleFrequency(JsonObject& json_process)
+{
+  fNPoints=20;
+
+  Setup(json_process);
+}
 
 ESP32SampleFrequency::~ESP32SampleFrequency()
 {
 
 }
 
-void ESP32SampleFrequency::Setup()
+void ESP32SampleFrequency::Setup(JsonObject& json_process)
 {
   Serial.println("INFO: Setting up ESP32SampleFrequency ");
   ESP32Processor::MessageTransportNames.clear();
   ESP32Processor::MessageTransportNames.push_back("sample_frequency");
+
+  if(json_process.containsKey("num_points")) fNPoints = atoi(json_process["num_points"]);
 
   for(int i=0;i<fNPoints;i++)
   {

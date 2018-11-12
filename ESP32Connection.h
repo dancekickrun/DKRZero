@@ -9,7 +9,6 @@
 #ifndef ESP32Connection_hpp
 #define ESP32Connection_hpp
 
-#include "ESP32Configuration.h"
 #include "Arduino.h"
 
 // Base class for all data connections
@@ -28,9 +27,7 @@ public:
     virtual void Communicate(String)=0;
 
     enum class ConnectionType{Wifi, Bluetooth, BLE, FTP, SD, MQTT};
-
     ESP32Connection::ConnectionType GetType(){return ESP32ConnectionType;};
-
     bool IsType(ESP32Connection::ConnectionType testType){return (testType==GetType());};
 
 

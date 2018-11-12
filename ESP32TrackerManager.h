@@ -1,3 +1,18 @@
+// Copyright (c) 2018 by Chris Steer.
+// All Rights Reserved.
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 #ifndef ESP32Tracker_h
 #define ESP32Tracker_h
 
@@ -7,6 +22,17 @@
 #include <vector>
 #include<ArduinoJson.h>
 #include <gp20u7.h>
+#include <SparkFunLSM9DS1.h>
+
+
+// Factory declarations
+#include "SensorFactory.h"
+#include "ProcessFactory.h"
+#include "ConnectionFactory.h"
+
+// Sensors' declarations
+#include "ESP32Sensor.h"
+
 
 // Processors' declarations
 #include "ESP32Cadence.h"
@@ -24,13 +50,13 @@
 #include "ESP32Connection.h"
 #include "ESP32BLEConnection.h"
 #include "ESP32WifiConnection.h"
-#include "ESP32FTPConnection.h"
+// #include "ESP32FTPConnection.h"
 #include "ESP32SDCardConnection.h"
 
 #define LSM9DS1_M  0x1E // Would be 0x1C if SDO_M is LOW
 #define LSM9DS1_AG  0x6B // Would be 0x6A if SDO_AG is LOW
 
-enum Error{ ConfigReadFail, IMUCommsFail, ProcessUnrecognized};
+enum Error{ ConfigReadFail,ConfigOpenFail,  SDCardMountFail, NoSDCard, IMUCommsFail, NotAllSensorsDefined,  ProcessUnrecognized};
 
 
 class ESP32TrackerManager
@@ -49,6 +75,7 @@ public:
   ESP32Processor* ProcessFactory(JsonObject &process);
   ESP32Connection* ConnectionFactory(JsonObject &connection);
 
+  void SetupSensors(JsonObject&);
   void SetupProcessors(JsonObject&);
   void SetupConnections(JsonObject&);
 
@@ -78,19 +105,26 @@ public:
   /**
   * Variables to go in here
   */
-  enum class State{ Initialize, Acquisition, Transfer};
+  enum class State{ Initialize, Acquisition, Paused, Transfer};
 
   /**
   *
   */
   // std::vector<VMessage* message> messages;
 
+  bool AccelSetup;
+  bool GyroSetup;
+  bool MagSetup;
 
   std::vector< ESP32Processor* > fProcessors;
   std::vector< ESP32Connection* > fConnections;
+  std::vector< ESP32Sensor* > fSensors;
 
   // Set up a Geolocation variable to track your current Location
-  Geolocation currentLocation;
+  // Geolocation currentLocation;
+
+  LSM9DS1 imu;  // Create an LSM9DS1 object
+
 
   int fHours;
   int fMinutes;
@@ -124,7 +158,7 @@ public:
   long fCurrentTime;
   long fLastTime;
 
-  ESP32Configuration *fESP32Config;
+  // ESP32Configuration *fESP32Config;
   State ESP32_State;
 
 
@@ -142,7 +176,7 @@ public:
 
 
   float fMeasurementInterval;
-
+  float fDesiredDataRate;
 
 
 };

@@ -13,45 +13,26 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-#ifndef ESP32SampleStatistics_hpp
-#define ESP32SampleStatistics_hpp
+#ifndef ConnectionFactory_hpp
+#define ConnectionFactory_hpp
 
 #include <vector>
 #include <stdio.h>
-#include "ESP32Processor.h"
 #include <ArduinoJson.h>
 
-class ESP32SampleStatistics : public ESP32Processor
-{
-
-public:
-
-    ESP32SampleStatistics(JsonObject& json_process);
-
-    ~ESP32SampleStatistics();
-
-    // Initialize the processor
-    void Setup(JsonObject& json_process);
-
-    //
-    void ProcessData(long, float data);
-    void ProcessData(long t,float la, float lo,
-      float ax,float ay,float az,
-      float gx,float gy,float gz,
-      float mx,float my,float mz);
-
-protected:
+// Connections' declarations
+#include "ESP32Connection.h"
+// =
+#include "ESP32BLEConnection.h"
+#include "ESP32WifiConnection.h"
+// #include "ESP32FTPConnection.h"
+#include "ESP32SDCardConnection.h"
 
 
-  int fNPoints;
-  std::vector<bool> onoffs;
+namespace ConnectionFactory {
 
-  // Vectors to hold the last N points for 9 measurements
-  std::vector< std::vector<float> > measurements;
+ESP32Connection* ConstructConnection(JsonObject& json_sensor);
 
-private:
+}// end of ConnectionFactory namespace
 
-};
-
-#endif /* ESP32SampleStatistics_hpp */
+#endif

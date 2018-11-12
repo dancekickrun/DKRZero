@@ -1,6 +1,17 @@
-//  Created by Chris Steer on 11/08/2018.
+// Copyright (c) 2018 by Chris Steer.
+// All Rights Reserved.
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 //
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
 //
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #define SERVICE_UUID           "6E400001-B5A3-F393-E0A9-E50E24DCCA9E" // UART service UUID
 #define CHARACTERISTIC_UUID_RX "6E400002-B5A3-F393-E0A9-E50E24DCCA9E"
@@ -8,22 +19,28 @@
 
 #include "ESP32BLEConnection.h"
 
-ESP32BLEConnection::ESP32BLEConnection(): fUnitName(String("ESP32"))
+ESP32BLEConnection::ESP32BLEConnection(JsonObject& json_connection): fUnitName(String("ESP32"))
 {
   // Set the type
   ESP32Connection::ESP32ConnectionType = ConnectionType::BLE;
 
+  Setup(json_connection);
 };
-
-ESP32BLEConnection::ESP32BLEConnection(String name): fUnitName(name)
-{
-  // Set the type
-  ESP32Connection::ESP32ConnectionType = ConnectionType::BLE;
-
-};
-
 
 ESP32BLEConnection::~ESP32BLEConnection(){}
+
+void ESP32BLEConnection::Setup(JsonObject& json_connection)
+{
+
+  if(json_connection.containsKey("bluetooth_name")){
+    const char* name = json_connection["bluetooth_name"];
+    fUnitName = String(name);
+  }
+
+}
+
+
+
 
 void ESP32BLEConnection::Initialize()
 {
@@ -107,11 +124,7 @@ void ESP32BLEConnection::Start()
   //
 };
 
-void ESP32BLEConnection::Stop(){
-
-
-
-};
+void ESP32BLEConnection::Stop(){};
 
 void ESP32BLEConnection::Communicate(String message)
 {

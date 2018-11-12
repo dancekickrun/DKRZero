@@ -1,23 +1,32 @@
+// Copyright (c) 2018 by Chris Steer.
+// All Rights Reserved.
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 //
-//  ESP32RawData.cpp
-//  trigger
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
 //
-//  Created by Chris Steer on 14/08/2018.
-//
-//
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "ESP32RawData.h"
 
-ESP32RawData::ESP32RawData(const char* message_format,const char* message_transport) :
-  ESP32Processor(message_format,message_transport)
+ESP32RawData::ESP32RawData(JsonObject& json_process)
 {
+
   ESP32Processor::fDataReady = true;
+
+  Setup(json_process);
 };
 
 ESP32RawData::~ESP32RawData(){};
 
 // Initialize the processor
-void ESP32RawData::Setup()
+void ESP32RawData::Setup(JsonObject& json_process)
 {
   fDelimiter = String(" ");
 
@@ -69,29 +78,33 @@ void ESP32RawData::ProcessData(long t, float lat, float lon,
   {
     // Serial.println("ESP32RawData::ProcessData()");
 
+
     ESP32Processor::fCurrentTime = t;
-    ax=aax;ay=aay;az=aaz;
-    gx=ggx;gy=ggy;gz=ggz;
-    mx=mmx;my=mmy;mz=mmz;
-    fLatitude = lat;
-    fLongitude = lon;
+    // ax=aax;ay=aay;az=aaz;
+    // gx=ggx;gy=ggy;gz=ggz;
+    // mx=mmx;my=mmy;mz=mmz;
+    // fLatitude = lat;
 
-    ESP32Processor::MessageTransportData.clear();
-    ESP32Processor::MessageTransportData.push_back((float) t);
+    // ESP32Processor::MessageTransportData.clear();
+    // ESP32Processor::MessageTransportData.shrink_to_fit();
+    // fLongitude = lon;
+    // MessageTransportData.reserve(768);
 
-    ESP32Processor::MessageTransportData.push_back(ax);
-    ESP32Processor::MessageTransportData.push_back(ay);
-    ESP32Processor::MessageTransportData.push_back(az);
+    ESP32Processor::MessageTransportData[0] = (float) t;
 
-    ESP32Processor::MessageTransportData.push_back(gx);
-    ESP32Processor::MessageTransportData.push_back(gy);
-    ESP32Processor::MessageTransportData.push_back(gz);
+    ESP32Processor::MessageTransportData[1] =  aax;
+    ESP32Processor::MessageTransportData[2] =  aay;
+    ESP32Processor::MessageTransportData[3] =  aaz;
 
-    ESP32Processor::MessageTransportData.push_back(mx);
-    ESP32Processor::MessageTransportData.push_back(my);
-    ESP32Processor::MessageTransportData.push_back(mz);
+    ESP32Processor::MessageTransportData[4] =  ggx;
+    ESP32Processor::MessageTransportData[5] =  ggy;
+    ESP32Processor::MessageTransportData[6] =  ggz;
 
-    ESP32Processor::MessageTransportData.push_back(fLatitude);
-    ESP32Processor::MessageTransportData.push_back(fLongitude);
+    ESP32Processor::MessageTransportData[7] =  mmx;
+    ESP32Processor::MessageTransportData[8] =  mmy;
+    ESP32Processor::MessageTransportData[9] =  mmz;
+
+    ESP32Processor::MessageTransportData[10] =  lat;
+    ESP32Processor::MessageTransportData[11] =  lon;
 
   };

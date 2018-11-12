@@ -14,44 +14,38 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-#ifndef ESP32SampleStatistics_hpp
-#define ESP32SampleStatistics_hpp
+#ifndef ESP32Accelerometer_hpp
+#define ESP32Accelerometer_hpp
 
 #include <vector>
 #include <stdio.h>
-#include "ESP32Processor.h"
 #include <ArduinoJson.h>
+#include "ESP32Sensor.h"
 
-class ESP32SampleStatistics : public ESP32Processor
+
+class ESP32Accelerometer : public ESP32Sensor
 {
 
 public:
 
-    ESP32SampleStatistics(JsonObject& json_process);
+    ESP32Accelerometer(JsonObject& root);
+    ~ESP32Accelerometer();
 
-    ~ESP32SampleStatistics();
+    void Setup(JsonObject& root);
+    void ConfigureIMU(LSM9DS1* imu);
 
-    // Initialize the processor
-    void Setup(JsonObject& json_process);
-
-    //
-    void ProcessData(long, float data);
-    void ProcessData(long t,float la, float lo,
-      float ax,float ay,float az,
-      float gx,float gy,float gz,
-      float mx,float my,float mz);
-
-protected:
-
-
-  int fNPoints;
-  std::vector<bool> onoffs;
-
-  // Vectors to hold the last N points for 9 measurements
-  std::vector< std::vector<float> > measurements;
+    bool GetHighResEnable(){return high_resolution_enable;};
+    int GetHighResBandwidth(){return high_resolution_bandwidth;};
+    int GetBandwidth(){return bandwidth;};
 
 private:
 
+  bool high_resolution_enable;
+  int high_resolution_bandwidth;
+  int bandwidth;
+
+
 };
 
-#endif /* ESP32SampleStatistics_hpp */
+
+#endif /* ESP32Sensor_hpp */
