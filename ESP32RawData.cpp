@@ -19,6 +19,10 @@ ESP32RawData::ESP32RawData(JsonObject& json_process)
 {
 
   ESP32Processor::fDataReady = true;
+  accelerometer_enable=true;
+  gyroscope_enable=true;
+  magnetometer_enable=true;
+  gps_enable=true;
 
   Setup(json_process);
 };
@@ -30,42 +34,55 @@ void ESP32RawData::Setup(JsonObject& json_process)
 {
   fDelimiter = String(" ");
 
+  if(json_process.containsKey("accelerometer")) accelerometer_enable = (bool) json_process["accelerometer"];
+  if(json_process.containsKey("gyroscope")) gyroscope_enable = (bool) json_process["gyroscope"];
+  if(json_process.containsKey("magnetometer")) magnetometer_enable = (bool) json_process["magnetometer"];
+  if(json_process.containsKey("gps")) gps_enable = (bool) json_process["gps"];
+
+  (accelerometer_enable) ? Serial.println("INFO: RawData accelerometer readout enabled") : Serial.println("INFO: RawData accelerometer readout disabled");
+  (gyroscope_enable)? Serial.println("INFO: RawData gyroscope readout enabled") : Serial.println("INFO: RawData gyroscope readout disabled");
+  (magnetometer_enable) ? Serial.println("INFO: RawData magnetometer readout enabled") : Serial.println("INFO: RawData magnetometer readout disabled");
+  (gps_enable) ? Serial.println("INFO: RawData gps readout enabled") : Serial.println("INFO: RawData gps readout disabled");
+
   ESP32Processor::MessageTransportNames.clear();
   ESP32Processor::MessageTransportNames.push_back(String("time"));
-  ESP32Processor::MessageTransportNames.push_back(String("linear_acceleration_x"));
-  ESP32Processor::MessageTransportNames.push_back(String("linear_acceleration_y"));
-  ESP32Processor::MessageTransportNames.push_back(String("linear_acceleration_z"));
 
-  ESP32Processor::MessageTransportNames.push_back(String("angular_acceleration_x"));
-  ESP32Processor::MessageTransportNames.push_back(String("angular_acceleration_y"));
-  ESP32Processor::MessageTransportNames.push_back(String("angular_acceleration_z"));
+  ESP32Processor::MessageTransportData.clear();
 
-  ESP32Processor::MessageTransportNames.push_back(String("magnetometer_x"));
-  ESP32Processor::MessageTransportNames.push_back(String("magnetometer_y"));
-  ESP32Processor::MessageTransportNames.push_back(String("magnetometer_z"));
 
-  ESP32Processor::MessageTransportNames.push_back(String("latitude"));
-  ESP32Processor::MessageTransportNames.push_back(String("longitude"));
+  if(accelerometer_enable)
+  {
+    ESP32Processor::MessageTransportNames.push_back(String("linear_acceleration_x"));
+    ESP32Processor::MessageTransportNames.push_back(String("linear_acceleration_y"));
+    ESP32Processor::MessageTransportNames.push_back(String("linear_acceleration_z"));
+  }
+
+  if(gyroscope_enable)
+  {
+    ESP32Processor::MessageTransportNames.push_back(String("angular_acceleration_x"));
+    ESP32Processor::MessageTransportNames.push_back(String("angular_acceleration_y"));
+    ESP32Processor::MessageTransportNames.push_back(String("angular_acceleration_z"));
+  }
+
+  if(magnetometer_enable)
+  {
+    ESP32Processor::MessageTransportNames.push_back(String("magnetometer_x"));
+    ESP32Processor::MessageTransportNames.push_back(String("magnetometer_y"));
+    ESP32Processor::MessageTransportNames.push_back(String("magnetometer_z"));
+  }
+
+  if(gps_enable)
+  {
+    ESP32Processor::MessageTransportNames.push_back(String("latitude"));
+    ESP32Processor::MessageTransportNames.push_back(String("longitude"));
+  }
 
   // ESP32Processor::MessageTransport = ESP32Processor::MessengerFormat::Space;
 
-  ESP32Processor::MessageTransportData.clear();
-  ESP32Processor::MessageTransportData.push_back(0.0);
 
-  ESP32Processor::MessageTransportData.push_back(0.0);
-  ESP32Processor::MessageTransportData.push_back(0.0);
-  ESP32Processor::MessageTransportData.push_back(0.0);
 
-  ESP32Processor::MessageTransportData.push_back(0.0);
-  ESP32Processor::MessageTransportData.push_back(0.0);
-  ESP32Processor::MessageTransportData.push_back(0.0);
 
-  ESP32Processor::MessageTransportData.push_back(0.0);
-  ESP32Processor::MessageTransportData.push_back(0.0);
-  ESP32Processor::MessageTransportData.push_back(0.0);
 
-  ESP32Processor::MessageTransportData.push_back(0.0);
-  ESP32Processor::MessageTransportData.push_back(0.0);
 };
 
 
@@ -90,21 +107,35 @@ void ESP32RawData::ProcessData(long t, float lat, float lon,
     // fLongitude = lon;
     // MessageTransportData.reserve(768);
 
-    ESP32Processor::MessageTransportData[0] = (float) t;
+    ESP32Processor::MessageTransportData.clear();
+    ESP32Processor::MessageTransportData.push_back((float) t);
 
-    ESP32Processor::MessageTransportData[1] =  aax;
-    ESP32Processor::MessageTransportData[2] =  aay;
-    ESP32Processor::MessageTransportData[3] =  aaz;
 
-    ESP32Processor::MessageTransportData[4] =  ggx;
-    ESP32Processor::MessageTransportData[5] =  ggy;
-    ESP32Processor::MessageTransportData[6] =  ggz;
+    if(accelerometer_enable)
+    {
+      ESP32Processor::MessageTransportData.push_back(aax);
+      ESP32Processor::MessageTransportData.push_back(aax);
+      ESP32Processor::MessageTransportData.push_back(aax);
+    }
 
-    ESP32Processor::MessageTransportData[7] =  mmx;
-    ESP32Processor::MessageTransportData[8] =  mmy;
-    ESP32Processor::MessageTransportData[9] =  mmz;
+    if(gyroscope_enable)
+    {
+      ESP32Processor::MessageTransportData.push_back(ggx);
+      ESP32Processor::MessageTransportData.push_back(ggy);
+      ESP32Processor::MessageTransportData.push_back(ggz);
+    }
 
-    ESP32Processor::MessageTransportData[10] =  lat;
-    ESP32Processor::MessageTransportData[11] =  lon;
+    if(magnetometer_enable)
+    {
+      ESP32Processor::MessageTransportData.push_back(mmx);
+      ESP32Processor::MessageTransportData.push_back(mmy);
+      ESP32Processor::MessageTransportData.push_back(mmz);
+    }
+
+    if(gps_enable)
+    {
+      ESP32Processor::MessageTransportData.push_back(lat);
+      ESP32Processor::MessageTransportData.push_back(lon);
+    }
 
   };

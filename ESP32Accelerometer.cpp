@@ -110,6 +110,7 @@ void ESP32Accelerometer::Setup(JsonObject& json_sensor)
 }
 
 
+
 void ESP32Accelerometer::ConfigureIMU(LSM9DS1* imu)
 {
 (imu->settings).accel.sampleRate = this->GetSampleRate();

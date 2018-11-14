@@ -39,6 +39,13 @@ ESP32Connection* ConnectionFactory::ConstructConnection(JsonObject& json_sensor)
       return new ESP32SDCardConnection(json_sensor);
   }
 
+  const char* serial_connection_name = "serial";
+  if (strcmp(name, serial_connection_name) == 0)
+  {
+      Serial.println("INFO: Connection serial created");
+      return new ESP32SerialConnection(json_sensor);
+  }
+
   Serial.print("INFO: Unknown connection name -> "); Serial.println(name);
 
 

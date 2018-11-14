@@ -110,20 +110,74 @@ String ESP32Processor::Message()
 
   if(fNelements<0) fNelements = 1e9;
 
-  char add_data[30];
-  char tmp_message[1000];
+  String s;
+  s = String(MessageTransportData[0],0);
+  s += String(" ");
 
-  snprintf(tmp_message, sizeof(tmp_message), "%12.0f ", (float) MessageTransportData[0]);
-
-  for(int i=1;i<MessageTransportData.size(); i++)
+  int i=1;
+  while(i < (int) MessageTransportData.size() )
   {
-    snprintf(add_data, sizeof(add_data), "%6.4f ", (float) MessageTransportData[i]);
-    strcat(tmp_message,add_data);
+    // This is for the Impulse processor to format each line correctly.
+    if(((i+1)%fNelements)==0)
+    {
+      s += String(MessageTransportData[i],6);
+      s += String("\n");
+      i++;
+      if(i < (int) MessageTransportData.size() )
+      {
+        s += String(MessageTransportData[i],0);
+        s += String(" ");
+        i++;
+      }
+    } else {
+      s += String(MessageTransportData[i],6);
+      s += String(" ");
+      i++;
+    }
+
   }
+  //
+  //
+  //
+  //
+  //
+  // char add_data[300];
+  //
+  // snprintf(tmp_message, sizeof(tmp_message), "%12.0f ", (float) MessageTransportData[0]);
+  //
+  // // Serial.println((float) MessageTransportData[0]);
+  // int i=1;
+  //
+  // // Serial.println((int) MessageTransportData.size());
+  // while(i < (int) MessageTransportData.size() )
+  // {
+  //   // This is for the Impulse processor to format each line correctly.
+  //   if(((i+1)%fNelements)==0)
+  //   {
+  //     snprintf(add_data, sizeof(add_data), "%6.4f \n", (float) MessageTransportData[i]);
+  //     strcat(tmp_message,add_data);
+  //     i++;
+  //     snprintf(add_data, sizeof(add_data), "%12.0f ", (float) MessageTransportData[i]);
+  //     strcat(tmp_message,add_data);
+  //     i++;
+  //   }else{
+  //     snprintf(add_data, sizeof(add_data), "%6.4f ", (float) MessageTransportData[i]);
+  //     strcat(tmp_message,add_data);
+  //     i++;
+  //   }
+  //
+  //   // Serial.print(i);
+  //   // Serial.print(" ");
+  //   // Serial.println(MessageTransportData[i]);
+  // }
+
   // snprintf(add_data, sizeof(add_data), "\n");
   // strcat(tmp_message,add_data);
 
-  return String(tmp_message);
+  // Serial.println(String(tmp_message));
+
+  return String(s);
+
 }
 
 

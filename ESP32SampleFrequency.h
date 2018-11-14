@@ -17,6 +17,7 @@
 #define ESP32SampleFrequency_hpp
 
 #include <vector>
+#include <algorithm>
 #include <stdio.h>
 #include "ESP32Processor.h"
 
@@ -47,6 +48,8 @@ protected:
   float fDiffTime;
 
 private:
+
+  float Median(std::vector<long> data);
 
 };
 

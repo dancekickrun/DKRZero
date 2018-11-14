@@ -27,6 +27,7 @@
 #include "ESP32WifiConnection.h"
 // #include "ESP32FTPConnection.h"
 #include "ESP32SDCardConnection.h"
+#include "ESP32SerialConnection.h"
 
 
 namespace ConnectionFactory {

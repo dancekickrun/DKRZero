@@ -113,6 +113,9 @@ protected:
 
   private:
 
+    // char tmp_message[100000];// This sets a fundamental limit for the number of data elements in a buffer to be eventually printed out
+
+
 };
 
 

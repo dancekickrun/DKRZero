@@ -14,7 +14,11 @@ ESP32Impulse::ESP32Impulse(JsonObject& json_process)
   fBufferThreshold = 2.0;
   fBufferDelay = 50;
 
-  for(int i=0;i<13;i++) fMeasurements.push_back(std::vector<float>(fBufferSize,0.0));
+  fAccelEnable=true;
+  fMagEnable=true;
+  fGyroEnable=true;
+
+  Setup(json_process);
 
   // fOnOffs(mask),
   // fDataCount(0),
@@ -57,21 +61,32 @@ ESP32Impulse::~ESP32Impulse(){};
 void ESP32Impulse::Setup(JsonObject& json_process)
 {
 
-  fNoNames=true;
-
 
   if(json_process.containsKey("buffer_size")) fBufferSize = atoi(json_process["buffer_size"]);
   if(json_process.containsKey("trigger_threshold")) fBufferThreshold = atoi(json_process["trigger_threshold"]);
   if(json_process.containsKey("trigger_delay")) fBufferDelay = atoi(json_process["trigger_delay"]);
+  if(json_process.containsKey("accelerometer")) fAccelEnable = (bool) json_process["accelerometer"];
+  if(json_process.containsKey("gyroscope")) fGyroEnable = (bool) json_process["gyroscope"];
+  if(json_process.containsKey("magnetometer")) fMagEnable = (bool) json_process["magnetometer"];
+
+  (fAccelEnable) ? Serial.println("INFO: Impulse accelerometer readout enabled") : Serial.println("INFO: Impulse accelerometer readout disabled");
+  (fGyroEnable)? Serial.println("INFO: Impulse gyroscope readout enabled") : Serial.println("INFO: Impulse gyroscope readout disabled");
+  (fMagEnable) ? Serial.println("INFO: Impulse magnetometer readout enabled") : Serial.println("INFO: Impulse magnetometer readout disabled");
+
+  // int n = ((int) fAccelEnable) + ((int) fGyroEnable) + ((int) fMagEnable);
+  // if(fBufferSize>130*n)
+  // {
+  //
+  // }
+
 
   Serial.println("INFO: Setting up Impulse Processor:");
-  Serial.print(" - Buffer Size ");
+  Serial.print("INFO: - Buffer Size ");
   Serial.println(fBufferSize);
-  Serial.print(" - Buffer Delay ");
+  Serial.print("INFO: - Buffer Delay ");
   Serial.println(fBufferDelay);
-  Serial.print(" - Buffer Threshold ");
+  Serial.print("INFO: - Buffer Threshold ");
   Serial.println(fBufferThreshold);
-  // Serial.print(" - Threshold Coord ");
   // Serial.println(fThresholdCoord);
   // Serial.print(" - Mask[0] ");
   // Serial.println(fOnOffs[0]);
@@ -85,22 +100,29 @@ void ESP32Impulse::Setup(JsonObject& json_process)
   fBufferDelayCount=0;
   fBufferDelayOn=false;
 
-  for(int i=0; i<13; i++)
-  {
-    fMeasurements[i].clear();
-    for(int j=0; j<fBufferSize; j++)
-    {
-      fMeasurements[i].push_back(0.0);
-      // Serial.println("i ");
-      // Serial.println(i);
-      // Serial.println("j ");
-      // Serial.println(j);
-      // Serial.println("data ");
-      // Serial.println(fMeasurements[i].at(j));
-    }
-  }
+  // int n_meas_types = 1 + 3*( ((int) fAccelEnable) + ((int) fGyroEnable) + ((int) fMagEnable) );
+  // int n = (fBufferSize*n_meas_types);
+  // ESP32Processor::MessageTransportData.reserve(n);
 
-  fOnOffs[0]=true;fOnOffs[1]=false;fOnOffs[2]=false;
+
+
+
+  // for(int i=0; i<13; i++)
+  // {
+  //   fMeasurements[i].clear();
+  //   for(int j=0; j<fBufferSize; j++)
+  //   {
+  //     fMeasurements[i].push_back(0.0);
+  //     // Serial.println("i ");
+  //     // Serial.println(i);
+  //     // Serial.println("j ");
+  //     // Serial.println(j);
+  //     // Serial.println("data ");
+  //     // Serial.println(fMeasurements[i].at(j));
+  //   }
+  // }
+  //
+  // fOnOffs[0]=true;fOnOffs[1]=false;fOnOffs[2]=false;
   fDelimiter = String(" ");
 
 }
@@ -110,9 +132,22 @@ void ESP32Impulse::ProcessData(long t,float lat,float lon, float a, float b,floa
   // Create a temporary vector with the tuple in it
   // std::vector<float> meas = {t,a,b,c,sqrt(a*a+b*b+c*c)};
   // BE CAREFUL MAX BUFFER SIZE IS 2040 elements = (2040/meas.size()) data points
-  std::vector<float> meas = {(float) t,sqrt(a*a+b*b+c*c)};
+  int n = 1 + 3*((int) fAccelEnable + (int) fGyroEnable + (int) fMagEnable);
+  std::vector<float> meas;// = {(float) t,sqrt(a*a+b*b+c*c)};
+  if(n>1) meas.reserve(n);
+
+  meas.push_back(t);
+  if(fAccelEnable) { meas.push_back(a);meas.push_back(b);meas.push_back(c); }
+  if(fGyroEnable) { meas.push_back(d);meas.push_back(e);meas.push_back(f); }
+  if(fMagEnable) { meas.push_back(g);meas.push_back(h);meas.push_back(i); }
+
+  float aa = sqrt(a*a+b*b+c*c);
+  bool any_enabled = fAccelEnable || fMagEnable || fGyroEnable;
+  if(!any_enabled) meas.push_back(aa);
+  
   // Serial.println(a);
   fNelements=meas.size();
+  // Serial.println(fNelements);
 
   // Copy the data straight into the message vector
   // - delete the first member if it is the same size as the buffer size*meas.size()
@@ -146,23 +181,29 @@ void ESP32Impulse::ProcessData(long t,float lat,float lon, float a, float b,floa
 
   // When the trigger condition is met, we need to start the count towards the buffer delay
   // so set the flag fBufferDelayOn to be true
-  if(meas.back()>fBufferThreshold) fBufferDelayOn = true;
+  if(aa>fBufferThreshold) fBufferDelayOn = true;
 
   // If the count is less than the delay then keep the data as being not ready
   if(fBufferDelayCount<fBufferDelay)
   {
     ESP32Processor::fDataReady=false;
-
   } else {
     // Here the count is equal to or larger than the delay count so we want to write it out
     ESP32Processor::fDataReady = true;
     // Stop the delay count and reinitialize it to 0
     fBufferDelayOn = false;
     fBufferDelayCount=0;
+    Serial.println(".");
   }
 
   // If the trigger condition has been met then keep counting the data into the buffer
-  if(fBufferDelayOn) fBufferDelayCount++;
+  if(fBufferDelayOn)
+  {
+    fBufferDelayCount++;
+    // Serial.print(fBufferDelayCount);
+    // Serial.print(" / ");
+    // Serial.println(fBufferDelay);
+  }
 
 }
 

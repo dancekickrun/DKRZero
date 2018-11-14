@@ -562,9 +562,9 @@ void ESP32TrackerManager::StartIMU()
   }
 
   bool all_sensors_setup  = AccelSetup && MagSetup && GyroSetup;
-  Serial.print("INFO: Accelerometer definition flag "); Serial.println(AccelSetup);
-  Serial.print("INFO: Magnetometer definition flag "); Serial.println(MagSetup);
-  Serial.print("INFO: Gyroscope definition flag "); Serial.println(GyroSetup);
+  if(AccelSetup){ Serial.println("INFO: Accelerometer definition ok "); } else { Serial.println("INFO: Accelerometer definition not ok "); }
+  if(MagSetup){ Serial.println("INFO: Magnetometer definition ok "); } else { Serial.println("INFO: Magnetometer definition not ok "); }
+  if(GyroSetup){ Serial.println("INFO: Gyroscope definition ok "); } else { Serial.println("INFO: Gyroscope definition not ok "); }
 
   if(!all_sensors_setup) PrintError(Error::NotAllSensorsDefined, String("Sensor block definitions incomplete"));
 
@@ -594,8 +594,6 @@ void ESP32TrackerManager::Acquisition()
   // Serial.print("State Updated "); Serial.println(fStateUpdated);
   if(!fStateUpdated) return;
 
-
-
   // Loop over the processors
   unsigned long startMillis = millis();
   unsigned long cur = millis();
@@ -607,18 +605,19 @@ void ESP32TrackerManager::Acquisition()
     // Serial.print("ProcessData ");
     // Serial.println(cur-startMillis);
 
-    fOutputMessage+=process->Message();
-    fOutputMessage+="\n";
-    fMessageCount++;
-    if((fMessageCount%20)==0)
-    {
-      Serial.println(fOutputMessage);
-      fOutputMessage="";
-    }
+    // fOutputMessage+=process->Message();
+    // fOutputMessage+="\n";
+    // fMessageCount++;
+    // if((fMessageCount%20)==0)
+    // {
+    //   Serial.println(fOutputMessage);
+    //   fOutputMessage="";
+    // }
 
     // startMillis = millis();
     if(process->GetDataReady())
     {
+      // Serial.println(process->Message());
       for(auto connection: fConnections)
       {
         connection->Communicate(process->Message());

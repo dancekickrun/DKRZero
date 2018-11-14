@@ -46,21 +46,20 @@ public:
     float g, float h, float i);
 
 
-  std::vector<bool> fOnOffs;
-
   // The data buffer
   std::vector< std::vector<float> > fMeasurements;
 
-  int fThresholdCoord;
   int fBufferSize;
   float fBufferThreshold;
   int fBufferDelayCount;
   int fBufferDelay;
   bool fBufferDelayOn;
 
-  bool fNoNames;
-
   int fDataCount;
+
+  bool fAccelEnable;
+  bool fGyroEnable;
+  bool fMagEnable;
 
   };
 

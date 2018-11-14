@@ -26,7 +26,7 @@ public:
 
     virtual void Communicate(String)=0;
 
-    enum class ConnectionType{Wifi, Bluetooth, BLE, FTP, SD, MQTT};
+    enum class ConnectionType{Wifi, Bluetooth, Serial, BLE, FTP, SD, MQTT};
     ESP32Connection::ConnectionType GetType(){return ESP32ConnectionType;};
     bool IsType(ESP32Connection::ConnectionType testType){return (testType==GetType());};
 

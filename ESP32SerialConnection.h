@@ -13,39 +13,40 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef ESP32RawData_hpp
-#define ESP32RawData_hpp
+#ifndef ESP32SerialConnection_hpp
+#define ESP32SerialConnection_hpp
 
+#include "Arduino.h"
+#include <vector>
 #include <stdio.h>
-#include "ESP32Processor.h"
+#include "ESP32Connection.h"
 #include <ArduinoJson.h>
 
-class ESP32RawData : public ESP32Processor {
+// Serial connections class
+class ESP32SerialConnection : public ESP32Connection {
+
 public:
 
-    ESP32RawData(JsonObject& json_process);
-    ~ESP32RawData();
+    ESP32SerialConnection(JsonObject& json_connection);
 
-    // Initialize the processor
-    void Setup(JsonObject& json_process);
+    ~ESP32SerialConnection();
 
-    //
-    void ProcessData(long, float data);
-    void ProcessData(long, float , float, float, float, float, float, float, float, float, float, float);
+    void Start(){};
+    void Stop(){};
+    void Initialize(){};
 
-    // float ax,ay,az,gx,gy,gz,mx,my,mz;
-    // float fLatitude,fLongitude;
-    // long fCurrentTime;
+    void Setup(JsonObject& json_connection);
 
-  private:
+    void Communicate(String);
 
-    bool accelerometer_enable;
-    bool gps_enable;
-    bool gyroscope_enable;
-    bool magnetometer_enable;
 
+private:
+
+  String output_data;
+  long fNumWrites;
+  int fWriteModulo;
 
 };
 
 
-#endif /* ESP32RawData_hpp */
+#endif
