@@ -18,7 +18,7 @@ bibliography: paper.bib
 
 # Summary
 
-Accelerometry is a fundamental technique in sports research that 
+Accelerometry is a fundamental technique in sports research that can be used to quantify the effectiveness of training sessions, rehabilitation, performance and quality of technique [cites]. 
 
 There are many commercially-available accelerometers that are used within sports research, in which the 
 closed and proprietary nature can be problematic. Potential issues include: the commercial accelerometers be expensive; 
