@@ -4,7 +4,7 @@ An embedded Arduino library for an open source accelerometer, based on the ESP32
 
 # Documentation
 
-The documentation is hosted on .
+The documentation is hosted on dancekickrun.com/docs
 
 # Installation and Dependencies
 
@@ -15,15 +15,15 @@ the libraries numpy and pyserial.
 
 ### Linux Python Libraries Installation 
 
-Type the following command within a terminal 
+After installing python, type the following command within a terminal 
 
 sudo pip install numpy pyserial
 
 ### Windows 
 
-python -m pip install numpy pyserial
+Please install python first. Then you will need to run install the libraries by runing the following within a command prompt: 
 
-python esp32_receiver.py
+python -m pip install numpy pyserial
 
 ## Arduino
 
